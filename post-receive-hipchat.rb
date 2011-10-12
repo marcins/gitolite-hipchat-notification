@@ -22,11 +22,13 @@ end
 
 repository = CONFIG['repository'] ||= File.basename(Dir.getwd, ".git")
 if CONFIG['gitweb_url']
-  url = "#{CONFIG['gitweb_url']}/#{repository}.git/commit/"
+  repo_url = "#{CONFIG['gitweb_url']}/#{repository}.git/"
+  commit_url = repo_url + "commit/"
 elsif CONFIG['cgit_url']
-  url = "#{CONFIG['cgit_url']}/#{repository}/commit/?id="
+  repo_url = "#{CONFIG['cgit_url']}/#{repository}/"
+  commit_url = repo_url + "commit/?id="
 else
-  url = nil
+  repo_url = commit_url = nil
 end
 
 git = `which git`.strip
@@ -50,14 +52,23 @@ File.open(filename, "w+") { |f| f.write Time.now.utc }
 
 commit_changes = `#{git} log --abbrev-commit --oneline --since='#{revtime}' --reverse`
 unless commit_changes.empty?
-  message = "Just pushed to #{repository}:<br/>"
+  message = "Commits just pushed to "
+  if repo_url
+    message += "<a href=\"#{repo_url}\">"
+  end
+  message += repository
+  if repo_url
+    message += "</a>"
+  end
+  message += ":<br/>"
+
   commit_changes.split("\n").each do |commit|
     if commit.strip =~ /^([\da-z]+) (.*)/
-      if url
-        message += "<a href=\"#{url + $1}\">"
+      if commit_url
+        message += "<a href=\"#{commit_url + $1}\">"
       end
       message += $1
-      if url
+      if commit_url
         message += "</a>"
       end
       message += " #{$2.split("\n").first}<br/>"
