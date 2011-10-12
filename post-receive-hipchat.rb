@@ -21,7 +21,11 @@ def speak(message)
 end
 
 repository = CONFIG['repository'] ||= File.basename(Dir.getwd, ".git")
-url = "#{CONFIG['gitweb_url']}/#{repository}.git/commit/" unless CONFIG['use_url'] == false
+if CONFIG['gitweb_url']
+  url = "#{CONFIG['gitweb_url']}/#{repository}.git/commit/"
+elsif CONFIG['cgit_url']
+  url = "#{CONFIG['cgit_url']}/#{repository}/commit/?id="
+end
 
 git = `which git`.strip
 

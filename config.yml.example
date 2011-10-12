@@ -2,6 +2,7 @@ hipchat_api_token: '<token>'
 hipchat_room: "<room name or id>"
 notify: 0
 from: "Gitolite"
+# define one of these to include URLs
 gitweb_url: 'https://my-gitweb-url.com'  # Must use "pretty" paths
-use_url: false       # Set to false to exclude web link from message
+# cgit_url: 'https://my-cgit-url.com'
 message_format: "git-log"
