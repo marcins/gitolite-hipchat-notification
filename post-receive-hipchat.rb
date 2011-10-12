@@ -25,6 +25,8 @@ if CONFIG['gitweb_url']
   url = "#{CONFIG['gitweb_url']}/#{repository}.git/commit/"
 elsif CONFIG['cgit_url']
   url = "#{CONFIG['cgit_url']}/#{repository}/commit/?id="
+else
+  url = nil
 end
 
 git = `which git`.strip
@@ -46,37 +48,22 @@ end
 revtime = last_revision.strftime("%Y %b %d %H:%M:%S %Z")
 File.open(filename, "w+") { |f| f.write Time.now.utc }
 
-if CONFIG['message_format'] == "edouard"
-  text = `#{git} log --all --since='#{revtime}' --reverse`
-  lines = text.split("\n\ncommit ")
-
-  if lines.any?
-    speak "Repository #{repository} has been pushed with the following commits:"
-    lines.each do |line|
-      revision       = line[/([a-f0-9]{40})/]
-      commit_author  = `#{git} show --pretty=format:"%an" #{revision} | sed q`.chomp
-      commit_log     = `#{git} show --pretty=format:"%s" #{revision}  | sed q`.chomp
-      commit_date    = `#{git} show --pretty=format:"%aD" #{revision} | sed q`.chomp
-      commit_changed = `#{git} diff-tree --name-status #{revision}    | sed -n '$p'`
-      commit_changes = commit_changed.split("\n").inject([]) do |memo, line|
-        if line.strip =~ /(\w)\s+(.*)/
-          memo << [$1, $2]
-        end
-      end.to_yaml
-      speak "#{commit_author} commited "#{commit_log}". #{url + revision}"
+commit_changes = `#{git} log --abbrev-commit --oneline --since='#{revtime}' --reverse`
+unless commit_changes.empty?
+  message = "Just pushed to #{repository}:<br/>"
+  commit_changes.split("\n").each do |commit|
+    if commit.strip =~ /^([\da-z]+) (.*)/
+      if url
+        message += "<a href=\"#{url + $1}\">"
+      end
+      message += $1
+      if url
+        message += "</a>"
+      end
+      message += " #{$2.split("\n").first}<br/>"
     end
   end
-
-elsif CONFIG['message_format'] == "git-log"
-  commit_changes = `#{git} log --name-status --since='#{revtime}' --reverse`
-  unless commit_changes.empty?
-    revision = commit_changes[/([a-f0-9]{40})/]
-    message = "Repository #{repository} has been pushed with the following commits:\n\n"
-    message += commit_changes
-    message += "\n"
-    message += "View commit at: #{url + revision}\n" unless CONFIG['use_url'] == false
-    speak "#{message}"
-  end
+  speak message
 end
 
 # Call to post-speak hook
