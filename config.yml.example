@@ -6,3 +6,5 @@ from: "Gitolite"
 gitweb_url: 'https://my-gitweb-url.com'  # Must use "pretty" paths
 # cgit_url: 'https://my-cgit-url.com'
 message_format: "git-log"
+# proxy_address: "1.2.3.4"
+# proxy_port: 83

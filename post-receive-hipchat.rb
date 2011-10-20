@@ -8,7 +8,8 @@ CONFIG = YAML::load(File.open(File.join(File.dirname(__FILE__), 'config.yml')))
 
 def speak(message)
   uri = URI.parse("https://api.hipchat.com/")
-  http = Net::HTTP.new(uri.host, uri.port)
+  http = Net::HTTP.new(uri.host, uri.port, CONFIG['proxy_address'],
+      CONFIG['proxy_port'])
   http.use_ssl = true
   http.verify_mode = OpenSSL::SSL::VERIFY_NONE
   request = Net::HTTP::Post.new("/v1/rooms/message")
