@@ -19,6 +19,7 @@ def speak(message)
       "notify" => CONFIG['notify'],
       "from" => CONFIG['from']})
   response = http.request(request)
+  puts "HipChat: Response - #{response.body}"
 end
 
 repository = CONFIG['repository'] ||= File.basename(Dir.getwd, ".git")
@@ -28,6 +29,9 @@ if CONFIG['gitweb_url']
 elsif CONFIG['cgit_url']
   repo_url = "#{CONFIG['cgit_url']}/#{repository}/"
   commit_url = repo_url + "commit/?id="
+elsif CONFIG['fisheye_url']
+  repo_url = "#{CONFIG['fisheye_url']}/browse/#{repository}/"
+  commit_url = "#{CONFIG['fisheye_url']}/changelog/#{repository}?cs="
 else
   repo_url = commit_url = nil
 end
@@ -39,7 +43,9 @@ load File.join(File.dirname(__FILE__), 'pre-speak') if File.exist?(File.join(Fil
 
 # Write in a file the timestamp of the last commit already posted to the room.
 filename = File.join(File.dirname(__FILE__), repository[/[\w.]+/] + ".log")
-if File.exist?(filename)
+if ARGV[0] and ARGV[0] == 'test'
+  last_revision = Time.now - 100_000_000
+elsif File.exist?(filename)
   last_revision = Time.parse(File.open(filename) { |f| f.read.strip })
 else
   # TODO: Skip error message if push includes first commit?
@@ -51,7 +57,7 @@ end
 revtime = last_revision.strftime("%Y %b %d %H:%M:%S %Z")
 File.open(filename, "w+") { |f| f.write Time.now.utc }
 
-commit_changes = `#{git} log --abbrev-commit --oneline --since='#{revtime}' --reverse`
+commit_changes = `#{git} log --abbrev-commit --oneline --since='#{revtime}' --reverse --pretty=format:"%h %d %an: %s" --all`
 unless commit_changes.empty?
   message = "Commits just pushed to "
   if repo_url
