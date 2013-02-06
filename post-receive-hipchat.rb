@@ -54,7 +54,7 @@ else
   last_revision = Time.now - 120
 end
 
-revtime = last_revision.strftime("%Y %b %d %H:%M:%S %Z")
+revtime = last_revision.strftime("%Y %b %d %H:%M:%S %z")
 File.open(filename, "w+") { |f| f.write Time.now.utc }
 
 commit_changes = `#{git} log --abbrev-commit --oneline --since='#{revtime}' --reverse --pretty=format:"%h %d %an: %s" --all`
