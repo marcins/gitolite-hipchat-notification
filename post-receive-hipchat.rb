@@ -1,10 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
 require 'time'
 require 'net/https'
-
-CONFIG = YAML::load(File.open(File.join(File.dirname(__FILE__), 'config.yml')))
 
 def speak(message)
   uri = URI.parse("https://api.hipchat.com/")
