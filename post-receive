@@ -1,4 +1,15 @@
 #!/usr/bin/env ruby
 
-# Call to post-speak hook
-load File.join(File.dirname(__FILE__), 'post-receive-hipchat.rb') if File.exist?(File.join(File.dirname(__FILE__), 'post-receive-hipchat.rb'))
+require 'yaml'
+CONFIG = YAML::load(File.open(File.join(File.dirname(__FILE__), 'config.yml')))
+
+scripts_glob = File.join(File.dirname(__FILE__), "post-receive-*.rb")
+Dir.glob scripts_glob do |filename|
+  script = File.basename(filename, ".rb")
+  puts "post-receive: #{script}"
+  begin
+    load filename
+  rescue Exception => e
+    puts "post-receive: #{script} FAILED: #{e}"
+  end
+end
