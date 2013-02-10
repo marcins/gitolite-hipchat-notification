@@ -3,6 +3,16 @@
 require 'yaml'
 CONFIG = YAML::load(File.open(File.join(File.dirname(__FILE__), 'config.yml')))
 
+REFS = []
+STDIN.each_line do |line|
+  parts = line.split(" ")
+  REFS << {
+    oldref: parts[0],
+    newref: parts[1],
+    ref: parts[2]
+  }
+end
+
 scripts_glob = File.join(File.dirname(__FILE__), "post-receive-*.rb")
 Dir.glob scripts_glob do |filename|
   script = File.basename(filename, ".rb")
@@ -10,6 +20,6 @@ Dir.glob scripts_glob do |filename|
   begin
     load filename
   rescue Exception => e
-    puts "post-receive: #{script} FAILED: #{e}"
+    puts "post-receive: #{script} FAILED: #{e}" unless e.to_s == "exit"
   end
 end
