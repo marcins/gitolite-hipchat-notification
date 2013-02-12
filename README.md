@@ -1,5 +1,9 @@
-gitolite-hipchat-notification
-==============================
+# Hookie
+
+This project has been superceded by [Hookie](https://github.com/marcins/hookie)!
+
+- - -
+
 
 Original adapted heavily from: https://github.com/LegionSB/gitolite-campfire-notification
 This one forked from https://github.com/peplin/gitolite-hipchat-notification
